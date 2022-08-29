@@ -1,0 +1,66 @@
+#wpr_user_role_price_tab_data {
+    padding: 20px }
+
+    #wpr_user_role_price_tab_data .row {
+        display: flex;
+        align-content: center;
+        align-items: center;
+        justify-content: space-between;
+        border-bottom: 1px solid #e9e9e9;
+        margin-bottom: 10px;
+        padding-bottom: 10px }
+    #wpr_user_role_price_tab_data .row:last-child {
+        border: 0 }
+
+    #wpr_user_role_price_tab_data .row .role-prices {
+        display: flex;
+        flex-direction: column;
+        gap: 5px }
+        #wpr_user_role_price_tab_data .row .role-prices label {
+            padding: 6px 0 }
+        #wpr_user_role_price_tab_data .row .role-prices input {
+            width: 100% }
+
+    .saving-roles-status {
+        position: fixed;
+        bottom: 80px;
+        right: 80px;
+        max-width: 300px;
+        padding: 1rem 1rem;
+        border: 1px solid transparent;
+        border-radius: 0.25rem;
+        animation: slide-rotate-ver-right 0.5s cubic-bezier(0.250, 0.460, 0.450, 0.940) reverse both;
+        z-index: 200 }
+    .saving-roles-status.success {
+        color: #0f5132;
+        background-color: #d1e7dd;
+        border-color: #badbcc }
+    .saving-roles-status.error {
+        color: #842029;
+        background-color: #f8d7da;
+        border-color: #f5c2c7 }
+
+    .saving-roles-status .error {
+        display: block }
+
+    .saving-roles-status .in-progress {
+        display: flex;
+        align-items: center }
+        .saving-roles-status .in-progress .loader {
+            display: flex;
+            margin-left: 20px }
+
+    .saving-roles-status .loader svg path,
+    .saving-roles-status .loader svg rect {
+        fill: #1e1e1e }
+
+    @keyframes slide-rotate-ver-right {
+        0% {
+        -webkit-transform: translateX(0) rotateY(0);
+                transform: translateX(0) rotateY(0);
+        }
+        100% {
+        -webkit-transform: translateX(150px) rotateY(-90deg);
+                transform: translateX(150px) rotateY(-90deg);
+        }
+    }
