@@ -51,13 +51,26 @@ document.addEventListener("DOMContentLoaded", function () {
             if (this.status == 200) {
                 let data = JSON.parse(this.responseText);
 
+                let loader = document.querySelector('.saving-roles-status .in-progress .loader');
+
                 if ('error' !== data.status) {
-                    $('.saving-roles-status .message').text(`Updated !`);
-                    $('.saving-roles-status .in-progress .loader').hide();
+                    document.querySelector('.saving-roles-status .message').innerText = `Updated !`;
+
+                    if( loader ) {
+                        loader.parentNode.removeChild(loader);
+                    }
                 } else {
-                    $('.saving-roles-status').addClass('error');
-                    $('.saving-roles-status .errors').append(`<span class="error">${data.message}</span>`);
-                    $('.saving-roles-status .in-progress .loader').hide();
+                    document.querySelector('.saving-roles-status').classList.add('error');
+
+                    let error = document.createElement('span');
+                    error.classList.add('error');
+                    error.innerText = data.message;
+
+                    document.querySelector('.saving-roles-status .errors').append(error);
+
+                    if( loader ) {
+                        loader.parentNode.removeChild(loader);
+                    }
                 }
             }
 
