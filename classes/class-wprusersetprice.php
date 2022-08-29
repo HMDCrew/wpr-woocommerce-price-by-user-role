@@ -28,9 +28,9 @@ if ( ! class_exists( 'WPRUserSetPrice' ) ) :
 		 * Action/filter hooks
 		 */
 		public function hooks() {
-			add_filter( 'woocommerce_product_get_price', array( $this, 'update_price_by_role' ), 10, 2 );
-			add_filter( 'woocommerce_product_get_regular_price', array( $this, 'wpr_update_regular_price_by_role' ), 10, 2 );
-			add_filter( 'woocommerce_product_get_sale_price', array( $this, 'wpr_update_sale_price_by_role' ), 10, 2 );
+			add_filter( 'woocommerce_product_get_price', array( $this, 'update_price_by_role' ), 30, 2 );
+			add_filter( 'woocommerce_product_get_regular_price', array( $this, 'wpr_update_regular_price_by_role' ), 30, 2 );
+			add_filter( 'woocommerce_product_get_sale_price', array( $this, 'wpr_update_sale_price_by_role' ), 30, 2 );
 		}
 
 
@@ -60,19 +60,22 @@ if ( ! class_exists( 'WPRUserSetPrice' ) ) :
 			if ( ! empty( $this->role_user ) ) {
 
 				$prod_roles = $this->db->get_product_user_roles( $product->get_id() );
-				$key_role   = $this->db->find_role_by_key( $this->role_user, $prod_roles->roles );
+				$key_role   = ( ! empty( $prod_roles ) ? $this->db->find_role_by_key( $this->role_user, $prod_roles->roles ) : false );
 
-				$first_role = reset( $key_role );
-				$min_price  = ( ! empty( $first_role[ $price_type ] ) ? $first_role[ $price_type ] : $first_role['regular'] );
+				if ( ! empty( $key_role ) ) {
 
-				foreach ( $key_role as $role ) {
+					$first_role = reset( $key_role );
+					$min_price  = ( ! empty( $first_role[ $price_type ] ) ? $first_role[ $price_type ] : $first_role['regular'] );
 
-					if ( $role[ $price_type ] < $min_price ) {
-						$min_price = $role[ $price_type ];
+					foreach ( $key_role as $role ) {
+
+						if ( $role[ $price_type ] < $min_price ) {
+							$min_price = $role[ $price_type ];
+						}
 					}
-				}
 
-				return $min_price;
+					return $min_price;
+				}
 			}
 
 			return $price;
