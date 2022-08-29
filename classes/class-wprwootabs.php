@@ -88,7 +88,7 @@ if ( ! class_exists( 'WPRWooTabs' ) ) :
 		 * Include/Require PHP files
 		 */
 		public function includes() {
-			require_once WPR_USER_ROLE_PRICE_PLUGIN_CLASSES . 'class-database.php';
+			require_once WPR_USER_ROLE_PRICE_PLUGIN_CLASSES . 'class-wpruserrolepricedb.php';
 			$this->db = \WPRUserRolePriceDB::instance();
 		}
 

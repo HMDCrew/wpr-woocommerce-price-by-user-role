@@ -31,6 +31,8 @@ if ( ! class_exists( 'WPRUserSetPrice' ) ) :
 			add_filter( 'woocommerce_product_get_price', array( $this, 'update_price_by_role' ), 30, 2 );
 			add_filter( 'woocommerce_product_get_regular_price', array( $this, 'wpr_update_regular_price_by_role' ), 30, 2 );
 			add_filter( 'woocommerce_product_get_sale_price', array( $this, 'wpr_update_sale_price_by_role' ), 30, 2 );
+
+			// add_action( 'woocommerce_add_to_cart', array( $this, 'bos4w_add_to_cart' ), 19, 6 );
 		}
 
 
@@ -115,7 +117,7 @@ if ( ! class_exists( 'WPRUserSetPrice' ) ) :
 		 * Include/Require PHP files
 		 */
 		public function includes() {
-			require_once WPR_USER_ROLE_PRICE_PLUGIN_CLASSES . 'class-database.php';
+			require_once WPR_USER_ROLE_PRICE_PLUGIN_CLASSES . 'class-wpruserrolepricedb.php';
 			$this->db = \WPRUserRolePriceDB::instance();
 		}
 
