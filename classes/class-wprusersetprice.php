@@ -10,12 +10,9 @@ if ( ! class_exists( 'WPRUserSetPrice' ) ) :
 		private $user;
 		private $role_user;
 
-		private $db;
-
 		public static function instance() {
 			if ( ! isset( self::$instance ) && ! ( self::$instance instanceof WPRUserSetPrice ) ) {
 				self::$instance = new WPRUserSetPrice;
-				self::$instance->includes();
 				self::$instance->hooks();
 
 				add_action( 'plugins_loaded', array( self::$instance, 'set_up_class_variable' ), 10 );
@@ -24,14 +21,6 @@ if ( ! class_exists( 'WPRUserSetPrice' ) ) :
 			return self::$instance;
 		}
 
-		/**
-		 * Action/filter hooks
-		 */
-		public function hooks() {
-			add_filter( 'woocommerce_product_get_price', array( $this, 'update_price_by_role' ), 30, 2 );
-			add_filter( 'woocommerce_product_get_regular_price', array( $this, 'wpr_update_regular_price_by_role' ), 30, 2 );
-			add_filter( 'woocommerce_product_get_sale_price', array( $this, 'wpr_update_sale_price_by_role' ), 30, 2 );
-		}
 
 		/**
 		 * It sets up a class variable.
@@ -41,6 +30,15 @@ if ( ! class_exists( 'WPRUserSetPrice' ) ) :
 			$this->role_user = $this->user->roles;
 		}
 
+
+		/**
+		 * Action/filter hooks
+		 */
+		public function hooks() {
+			add_filter( 'woocommerce_product_get_price', array( $this, 'update_price_by_role' ), 30, 2 );
+			add_filter( 'woocommerce_product_get_regular_price', array( $this, 'wpr_update_regular_price_by_role' ), 30, 2 );
+			add_filter( 'woocommerce_product_get_sale_price', array( $this, 'wpr_update_sale_price_by_role' ), 30, 2 );
+		}
 
 
 		/**
@@ -53,32 +51,32 @@ if ( ! class_exists( 'WPRUserSetPrice' ) ) :
 		 *
 		 * @return The minimum price of the product.
 		 */
-		public function update_price_by_role( $price, $product, $price_type = 'sale' ) {
+		public function update_price_by_role( $price, $product ) {
 
-			if ( ! empty( $this->role_user ) ) {
+			if ( is_user_logged_in() ) {
 
-				$prod_roles = $this->db->get_product_user_roles( $product->get_id() );
-				$key_role   = ( ! empty( $prod_roles ) ? $this->db->find_role_by_key( $this->role_user, $prod_roles->roles ) : false );
+				$orginal_regular_price = get_post_meta( $product->get_id(), '_regular_price', true );
+				$orginal_sale_price    = get_post_meta( $product->get_id(), '_sale_price', true );
+				$orginal_sale_price    = ( empty( $orginal_sale_price ) ? $orginal_regular_price : $orginal_sale_price );
 
-				if ( ! empty( $key_role ) ) {
+				$minor_price = false;
+				foreach ( $this->role_user as $role ) {
 
-					$first_role = reset( $key_role );
-					$min_price  = ( ! empty( $first_role[ $price_type ] ) ? $first_role[ $price_type ] : $first_role['regular'] );
+					$price_meta      = $product->get_meta( 'wpr_price_by_user_role_regular_price_' . $role );
+					$sale_price_meta = $product->get_meta( 'wpr_price_by_user_role_sale_price_' . $role );
 
-					foreach ( $key_role as $role ) {
+					$minor_price     = ( empty( $minor_price ) ? $orginal_regular_price : $minor_price );
+					$price_meta      = ( empty( $price_meta ) ? $orginal_regular_price : $price_meta );
+					$sale_price_meta = ( empty( $sale_price_meta ) ? $orginal_regular_price : $sale_price_meta );
 
-						if ( $role[ $price_type ] < $min_price ) {
-							$min_price = $role[ $price_type ];
-						}
-					}
-
-					return $min_price;
+					$minor_price = min( $orginal_regular_price, $orginal_sale_price, $price_meta, $sale_price_meta, $minor_price );
 				}
+
+				return $minor_price;
 			}
 
 			return $price;
 		}
-
 
 
 		/**
@@ -90,9 +88,31 @@ if ( ! class_exists( 'WPRUserSetPrice' ) ) :
 		 * @return The price of the product.
 		 */
 		public function wpr_update_regular_price_by_role( $price, $product ) {
-			return $this->update_price_by_role( $price, $product, 'regular' );
-		}
 
+			if ( is_user_logged_in() ) {
+
+				$orginal_regular_price = get_post_meta( $product->get_id(), '_regular_price', true );
+
+				$minor_price = false;
+				foreach ( $this->role_user as $role ) {
+
+					$price_meta = $product->get_meta( 'wpr_price_by_user_role_regular_price_' . $role );
+
+					$minor_price = ( empty( $minor_price ) ? $orginal_regular_price : $minor_price );
+					$price_meta  = ( empty( $price_meta ) ? $orginal_regular_price : $price_meta );
+
+					if ( ! empty( $price_meta ) && ! empty( $minor_price ) ) {
+						$minor_price = min( $price_meta, $minor_price );
+					} elseif ( ! empty( $price_meta ) ) {
+						$minor_price = $price_meta;
+					}
+				}
+
+				return $minor_price;
+			}
+
+			return $price;
+		}
 
 
 		/**
@@ -105,19 +125,30 @@ if ( ! class_exists( 'WPRUserSetPrice' ) ) :
 		 * @return The price of the product.
 		 */
 		public function wpr_update_sale_price_by_role( $price, $product ) {
-			return $this->update_price_by_role( $price, $product, 'sale' );
+			if ( is_user_logged_in() ) {
+
+				$orginal_sale_price = get_post_meta( $product->get_id(), '_sale_price', true );
+
+				$minor_price = false;
+				foreach ( $this->role_user as $role ) {
+
+					$price_meta = $product->get_meta( 'wpr_price_by_user_role_sale_price_' . $role );
+
+					$minor_price = ( empty( $minor_price ) ? $orginal_sale_price : $minor_price );
+					$price_meta  = ( empty( $price_meta ) ? $orginal_sale_price : $price_meta );
+
+					if ( ! empty( $price_meta ) && ! empty( $minor_price ) ) {
+						$minor_price = min( $price_meta, $minor_price );
+					} elseif ( ! empty( $price_meta ) ) {
+						$minor_price = $price_meta;
+					}
+				}
+
+				return $minor_price;
+			}
+
+			return $price;
 		}
-
-
-
-		/**
-		 * Include/Require PHP files
-		 */
-		public function includes() {
-			require_once WPR_USER_ROLE_PRICE_PLUGIN_CLASSES . 'class-wpruserrolepricedb.php';
-			$this->db = \WPRUserRolePriceDB::instance();
-		}
-
 	}
 
 endif;

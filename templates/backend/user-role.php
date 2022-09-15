@@ -22,12 +22,17 @@ defined( 'ABSPATH' ) || exit;
 
 <div id="wpr_user_role_price_tab_data" class="panel woocommerce_options_panel">
 
-	<?php foreach ( $user_roles as $key => $role ) : ?>
+	<?php foreach ( $user_roles as $key => $role_name ) : ?>
+
+		<?php
+			$regular_price = get_post_meta( get_the_ID(), 'wpr_price_by_user_role_regular_price_' . $key, true );
+			$sale_price    = get_post_meta( get_the_ID(), 'wpr_price_by_user_role_sale_price_' . $key, true );
+		?>
 
 		<div class="row" data-key="<?php echo $key; ?>">
 
 			<div class="col-6 role-name">
-				<h4><?php echo $role['name']; ?></h4>
+				<h4><?php echo $role_name; ?></h4>
 			</div>
 
 			<div class="col-6 role-prices">
@@ -36,14 +41,14 @@ defined( 'ABSPATH' ) || exit;
 					<label for="regular-price-<?php echo $key; ?>">
 						<?php echo __( 'Regular price', 'wpr-user-role-price' ); ?>
 					</label>
-					<input type="text" id="regular-price-<?php echo $key; ?>" class="role-regular-price" value="<?php echo $role['values']['regular']; ?>" />
+					<input type="text" id="regular-price-<?php echo $key; ?>" name="wpr_price_role[<?php echo $key; ?>][regular]" class="role-regular-price" value="<?php echo $regular_price; ?>" />
 				</div>
 
 				<div class="sale-price">
 					<label for="sale-price-<?php echo $key; ?>">
 						<?php echo __( 'Sale price', 'wpr-user-role-price' ); ?>
 					</label>
-					<input type="text" id="sale-price-<?php echo $key; ?>" class="role-sale-price" value="<?php echo $role['values']['sale']; ?>" />
+					<input type="text" id="sale-price-<?php echo $key; ?>" name="wpr_price_role[<?php echo $key; ?>][sale]" class="role-sale-price" value="<?php echo $sale_price; ?>" />
 				</div>
 
 			</div> <!-- .role-prices -->
@@ -51,7 +56,5 @@ defined( 'ABSPATH' ) || exit;
 		</div> <!-- .row -->
 
 	<?php endforeach; ?>
-
-	<button type="button" class="button save-wpr-user-role button-primary"><?php echo __( 'Save prices', 'wpr-user-role-price' ); ?></button>
 
 </div> <!-- #wpr_user_role_price_tab_data -->

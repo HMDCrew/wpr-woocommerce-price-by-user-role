@@ -27,7 +27,6 @@ if ( ! class_exists( 'WPRUserRolePrice' ) ) :
 				self::$instance = new WPRUserRolePrice;
 				self::$instance->constants();
 				self::$instance->includes();
-				self::$instance->hooks();
 			}
 
 			return self::$instance;
@@ -79,42 +78,15 @@ if ( ! class_exists( 'WPRUserRolePrice' ) ) :
 		}
 
 		/**
-		 * Action/filter hooks
-		 */
-		public function hooks() {
-			register_activation_hook( WPR_USER_ROLE_PRICE_PLUGIN_FILE, array( $this, 'activate' ) );
-			register_deactivation_hook( WPR_USER_ROLE_PRICE_PLUGIN_FILE, array( $this, 'deactivate' ) );
-		}
-
-		/**
 		 * Include/Require PHP files
 		 */
 		public function includes() {
 
-			require_once WPR_USER_ROLE_PRICE_PLUGIN_CLASSES . 'class-wpruserrolepricedb.php';
 			require_once WPR_USER_ROLE_PRICE_PLUGIN_CLASSES . 'class-wprwootabs.php';
-			require_once WPR_USER_ROLE_PRICE_PLUGIN_CLASSES . 'class-wpruserrolepriceendpoints.php';
 			require_once WPR_USER_ROLE_PRICE_PLUGIN_CLASSES . 'class-wprusersetprice.php';
 
-			$this->db = \WPRUserRolePriceDB::instance();
-
 			\WPRWooTabs::instance();
-			\WPRUserRolePriceEndPoints::instance();
 			\WPRUserSetPrice::instance();
-		}
-
-		/**
-		 * Run on plugin activation
-		 */
-		public function activate() {
-			$this->db->setup();
-		}
-
-		/**
-		 * Run on plugin de-activation
-		 */
-		public function deactivate() {
-
 		}
 	}
 
